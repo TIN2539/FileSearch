@@ -1,0 +1,35 @@
+﻿<Window x:Class="FileSearch.Presentation.Wpf.MainView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:FileSearch.Presentation.Wpf.ViewModels"
+        Title="File Search"
+        WindowStartupLocation="CenterScreen"
+        Height="450"
+        Width="600">
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <ListBox Grid.Row="1" Margin="0, 5, 0, 0" ItemsSource="{Binding FindedFiles}">
+            <ListBox.ItemTemplate>
+                <DataTemplate DataType="{x:Type local:FileListViewModel}">
+                    <DockPanel>
+                        <TextBlock Text="{Binding Name}" FontWeight="Black" />
+                        <TextBlock Text=" (" />
+                        <TextBlock Text="{Binding Path}" />
+                        <TextBlock Text=")" />
+                    </DockPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <DockPanel Grid.Row="0">
+            <Button DockPanel.Dock="Right" Width="75" Margin="5, 0, 0, 0" Command="{Binding StopCommand}">Stop</Button>
+            <Button DockPanel.Dock="Right" Width="75" Margin="5, 0, 0, 0" Command="{Binding ResumeCommand}">Resume</Button>
+            <Button DockPanel.Dock="Right" Width="75" Margin="5, 0, 0, 0" Command="{Binding PauseCommand}">Pause</Button>
+            <Button DockPanel.Dock="Right" Width="75" Margin="5, 0, 0, 0" Command="{Binding SearchCommand}">Search</Button>
+            <ComboBox DockPanel.Dock="Left" Width="45" Margin="0, 0, 5, 0" ItemsSource="{Binding Drives}" SelectedItem="{Binding SelectedDrive}" />
+            <TextBox Text="{Binding SearchMask, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+        </DockPanel>
+    </Grid>
+</Window>
