@@ -115,6 +115,6 @@ namespace FileSearch.Presentation.Wpf.ViewModels
         }
 
         [RaiseCanExecuteDependsUpon(nameof(searchCommand))]
-        public bool CanPause => canPause;
+        public bool CanPause => searchCommand.CanExecute();
     }
 }
