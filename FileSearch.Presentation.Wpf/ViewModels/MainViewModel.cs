@@ -45,11 +45,6 @@ namespace FileSearch.Presentation.Wpf.ViewModels
             SearchStoped += (sender, e) => { ChangeButonsStateBecauseSearchStoped(); };
         }
 
-        public event EventHandler ResumeSearch;
-        public event EventHandler SearchPaused;
-        public event EventHandler SearchStarted;
-        public event EventHandler SearchStoped;
-
         public bool CanPause
         {
             get => canPause;
@@ -100,6 +95,11 @@ namespace FileSearch.Presentation.Wpf.ViewModels
         [RaiseCanExecuteDependsUpon(nameof(CanStop))]
         public Command StopCommand => stopCommand;
 
+        public event EventHandler ResumeSearch;
+        public event EventHandler SearchPaused;
+        public event EventHandler SearchStarted;
+        public event EventHandler SearchStoped;
+
         private void ChangeButonsStateBecauseSearchStoped()
         {
             CanStop = false;
@@ -138,6 +138,7 @@ namespace FileSearch.Presentation.Wpf.ViewModels
             CanStop = true;
             CanResume = false;
         }
+
         private void Pause()
         {
             thread.Suspend();
