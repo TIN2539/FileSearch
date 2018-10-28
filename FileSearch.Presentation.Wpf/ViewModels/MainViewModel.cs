@@ -13,6 +13,8 @@ namespace FileSearch.Presentation.Wpf.ViewModels
 {
     public class MainViewModel : ViewModel
     {
+        private readonly IEnumerable<DriveInfo> drives;
+        private readonly ICollection<FileListViewModel> foundFiles = new ObservableCollection<FileListViewModel>();
         private readonly Command pauseCommand;
         private readonly Command resumeCommand;
         private readonly Command searchCommand;
@@ -22,8 +24,6 @@ namespace FileSearch.Presentation.Wpf.ViewModels
         private bool canPause;
         private bool canResume;
         private bool canStop;
-        private readonly IEnumerable<DriveInfo> drives;
-        private readonly ICollection<FileListViewModel> foundFiles = new ObservableCollection<FileListViewModel>();
         private string searchMask = string.Empty;
         private DriveInfo selectedDrive;
         private Thread thread;
@@ -38,12 +38,11 @@ namespace FileSearch.Presentation.Wpf.ViewModels
             stopCommand = new DelegateCommand(Stop, () => CanStop);
             this.synchronizationContext = synchronizationContext;
             stackBasedIteration.FilesFound += (sender, e) => TryAddFoundFiles(e);
-            stackBasedIteration.SearchFinished += (sender, e) =>
-            synchronizationContext.Invoke(() => { CanStop = false; CanResume = false; CanPause = false; });
-            SearchStarted += (sender, e) => { CanPause = true; CanStop = true; CanResume = false; };
-            SearchPaused += (sender, e) => { CanPause = false; CanResume = true; CanStop = true; };
-            ResumeSearch += (sender, e) => { CanResume = false; CanPause = true; CanStop = true; };
-            SearchStoped += (sender, e) => { CanStop = false; CanResume = false; CanPause = false; };
+            stackBasedIteration.SearchFinished += (sender, e) => ChangeButtonsStateBecauseSearchFinished(synchronizationContext);
+            SearchStarted += (sender, e) => { ChangeButtonsStateBecauseSearchStarted(); };
+            SearchPaused += (sender, e) => { ChangeButtonsStateBecauseSearchPaused(); };
+            ResumeSearch += (sender, e) => { ChangeButtonsStateBecauseResumeSearch(); };
+            SearchStoped += (sender, e) => { ChangeButonsStateBecauseSearchStoped(); };
         }
 
         public event EventHandler ResumeSearch;
@@ -73,17 +72,9 @@ namespace FileSearch.Presentation.Wpf.ViewModels
             set => SetProperty(ref canStop, value);
         }
 
-        public IEnumerable<DriveInfo> Drives
-        {
-            get => drives;
-            set => SetProperty(ref drives, value);
-        }
+        public IEnumerable<DriveInfo> Drives => drives;
 
-        public ICollection<FileListViewModel> FindedFiles
-        {
-            get => foundFiles;
-            set => SetProperty(ref foundFiles, value);
-        }
+        public ICollection<FileListViewModel> FoundFiles => foundFiles;
 
         [RaiseCanExecuteDependsUpon(nameof(CanPause))]
         public Command PauseCommand => pauseCommand;
@@ -109,6 +100,44 @@ namespace FileSearch.Presentation.Wpf.ViewModels
         [RaiseCanExecuteDependsUpon(nameof(CanStop))]
         public Command StopCommand => stopCommand;
 
+        private void ChangeButonsStateBecauseSearchStoped()
+        {
+            CanStop = false;
+            CanResume = false;
+            CanPause = false;
+        }
+
+        private void ChangeButtonsStateBecauseResumeSearch()
+        {
+            CanResume = false;
+            CanPause = true;
+            CanStop = true;
+        }
+
+        private void ChangeButtonsStateBecauseSearchFinished(ISynchronizationContext synchronizationContext)
+        {
+            synchronizationContext.Invoke(() =>
+            {
+                CanStop = false;
+                CanResume = false;
+                CanPause = false;
+            }
+            );
+        }
+
+        private void ChangeButtonsStateBecauseSearchPaused()
+        {
+            CanPause = false;
+            CanResume = true;
+            CanStop = true;
+        }
+
+        private void ChangeButtonsStateBecauseSearchStarted()
+        {
+            CanPause = true;
+            CanStop = true;
+            CanResume = false;
+        }
         private void Pause()
         {
             thread.Suspend();
