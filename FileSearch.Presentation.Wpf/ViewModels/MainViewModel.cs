@@ -161,11 +161,7 @@ namespace FileSearch.Presentation.Wpf.ViewModels
 
         private void Stop()
         {
-            try
-            {
-                thread.Abort();
-            }
-            catch (ThreadStateException)
+            if(CanResume)
             {
                 thread.Resume();
             }

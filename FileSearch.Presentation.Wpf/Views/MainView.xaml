@@ -11,7 +11,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition />
         </Grid.RowDefinitions>
-        <ListBox Grid.Row="1" Margin="0, 5, 0, 0" ItemsSource="{Binding FindedFiles}">
+        <ListBox Grid.Row="1" Margin="0, 5, 0, 0" ItemsSource="{Binding FoundFiles}">
             <ListBox.ItemTemplate>
                 <DataTemplate DataType="{x:Type local:FileListViewModel}">
                     <DockPanel>
@@ -28,7 +28,7 @@
             <Button DockPanel.Dock="Right" Width="75" Margin="5, 0, 0, 0" Command="{Binding ResumeCommand}">Resume</Button>
             <Button DockPanel.Dock="Right" Width="75" Margin="5, 0, 0, 0" Command="{Binding PauseCommand}">Pause</Button>
             <Button DockPanel.Dock="Right" Width="75" Margin="5, 0, 0, 0" Command="{Binding SearchCommand}">Search</Button>
-            <ComboBox DockPanel.Dock="Left" Width="45" Margin="0, 0, 5, 0" ItemsSource="{Binding Drives}" SelectedItem="{Binding SelectedDrive, Mode=TwoWay}" IsSynchronizedWithCurrentItem="True" />
+            <ComboBox DockPanel.Dock="Left" Width="45" Margin="0, 0, 5, 0" ItemsSource="{Binding Drives}" SelectedItem="{Binding SelectedDrive}"/>
             <TextBox Text="{Binding SearchMask, UpdateSourceTrigger=PropertyChanged}"></TextBox>
         </DockPanel>
     </Grid>
