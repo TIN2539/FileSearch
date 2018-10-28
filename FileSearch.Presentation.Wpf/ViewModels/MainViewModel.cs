@@ -23,7 +23,7 @@ namespace FileSearch.Presentation.Wpf.ViewModels
         private bool canResume;
         private bool canStop;
         private IEnumerable<DriveInfo> drives;
-        private ICollection<FileListViewModel> findedFiles = new ObservableCollection<FileListViewModel>();
+        private ICollection<FileListViewModel> foundFiles = new ObservableCollection<FileListViewModel>();
         private string searchMask = string.Empty;
         private DriveInfo selectedDrive;
         private Thread thread;
@@ -38,7 +38,7 @@ namespace FileSearch.Presentation.Wpf.ViewModels
             resumeCommand = new DelegateCommand(Resume, () => CanResume);
             stopCommand = new DelegateCommand(Stop, () => CanStop);
             this.synchronizationContext = synchronizationContext;
-            stackBasedIteration.FilesFinded += (sender, e) => TryAddFindedFiles(e);
+            stackBasedIteration.FilesFound += (sender, e) => TryAddFoundFiles(e);
             stackBasedIteration.SearchFinished += (sender, e) =>
             synchronizationContext.Invoke(() => { CanStop = false; CanResume = false; CanPause = false; });
             SearchStarted += (sender, e) => { CanPause = true; CanStop = true; CanResume = false; };
@@ -82,8 +82,8 @@ namespace FileSearch.Presentation.Wpf.ViewModels
 
         public ICollection<FileListViewModel> FindedFiles
         {
-            get => findedFiles;
-            set => SetProperty(ref findedFiles, value);
+            get => foundFiles;
+            set => SetProperty(ref foundFiles, value);
         }
 
         [RaiseCanExecuteDependsUpon(nameof(CanPause))]
@@ -124,7 +124,7 @@ namespace FileSearch.Presentation.Wpf.ViewModels
 
         private void Search()
         {
-            findedFiles.Clear();
+            foundFiles.Clear();
             thread = new Thread(() => stackBasedIteration.WalkDriveTree(selectedDrive, searchMask)) { IsBackground = true };
             thread.Start();
             SearchStarted?.Invoke(this, EventArgs.Empty);
@@ -144,13 +144,13 @@ namespace FileSearch.Presentation.Wpf.ViewModels
             SearchStoped?.Invoke(this, EventArgs.Empty);
         }
 
-        private void TryAddFindedFiles(FilesEventArgs e)
+        private void TryAddFoundFiles(FilesEventArgs e)
         {
             synchronizationContext.Invoke(() =>
             {
                 foreach (FileInfo file in e.Files)
                 {
-                    findedFiles.Add(new FileListViewModel(file));
+                    foundFiles.Add(new FileListViewModel(file));
                 }
             });
         }

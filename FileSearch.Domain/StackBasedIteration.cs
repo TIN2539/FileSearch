@@ -5,7 +5,7 @@ namespace FileSearch.Domain
 {
     public class StackBasedIteration
     {
-        public event EventHandler<FilesEventArgs> FilesFinded;
+        public event EventHandler<FilesEventArgs> FilesFound;
         public event EventHandler SearchFinished;
 
         public void WalkDirectoryTree(DirectoryInfo root, string searchMask)
@@ -17,7 +17,7 @@ namespace FileSearch.Domain
                 files = root.GetFiles(searchMask);
                 if (files.Length > 0)
                 {
-                    FilesFinded?.Invoke(this, new FilesEventArgs(files));
+                    FilesFound?.Invoke(this, new FilesEventArgs(files));
                 }
             }
             catch (UnauthorizedAccessException) { }
