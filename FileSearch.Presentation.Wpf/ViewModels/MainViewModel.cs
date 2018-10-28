@@ -37,8 +37,10 @@ namespace FileSearch.Presentation.Wpf.ViewModels
             pauseCommand = new DelegateCommand(Pause, () => CanPause);
             resumeCommand = new DelegateCommand(Resume, () => CanResume);
             stopCommand = new DelegateCommand(Stop, () => CanStop);
-            stackBasedIteration.FilesFinded += (sender, e) => TryAddFindedFiles(e);
             this.synchronizationContext = synchronizationContext;
+            stackBasedIteration.FilesFinded += (sender, e) => TryAddFindedFiles(e);
+            stackBasedIteration.SearcFinished += (sender, e) =>
+            synchronizationContext.Invoke(() => { CanStop = false; CanResume = false; CanPause = false; });
             SearchStarted += (sender, e) => { CanPause = true; CanStop = true; CanResume = false; };
             SearchPaused += (sender, e) => { CanPause = false; CanResume = true; CanStop = true; };
             ResumeSearch += (sender, e) => { CanResume = false; CanPause = true; CanStop = true; };

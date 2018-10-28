@@ -7,6 +7,8 @@ namespace FileSearch.Domain
     {
         public event EventHandler<FilesEventArgs> FilesFinded;
 
+        public event EventHandler SearcFinished;
+
         public void WalkDirectoryTree(DirectoryInfo root, string searchMask)
         {
             DirectoryInfo[] subDirs = null;
@@ -35,6 +37,7 @@ namespace FileSearch.Domain
         public void WalkDriveTree(DriveInfo drive, string searchMask)
         {
             WalkDirectoryTree(drive.RootDirectory, searchMask);
+            SearcFinished?.Invoke(this, EventArgs.Empty);
         }
     }
 }
