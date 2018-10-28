@@ -6,7 +6,7 @@ namespace FileSearch.Domain
     public class StackBasedIteration
     {
         public event EventHandler<FilesEventArgs> FilesFinded;
-        public event EventHandler SearcFinished;
+        public event EventHandler SearchFinished;
 
         public void WalkDirectoryTree(DirectoryInfo root, string searchMask)
         {
@@ -36,7 +36,7 @@ namespace FileSearch.Domain
         public void WalkDriveTree(DriveInfo drive, string searchMask)
         {
             WalkDirectoryTree(drive.RootDirectory, searchMask);
-            SearcFinished?.Invoke(this, EventArgs.Empty);
+            SearchFinished?.Invoke(this, EventArgs.Empty);
         }
     }
 }
