@@ -10,7 +10,7 @@ namespace FileSearch.Presentation.Wpf.ViewModels
         public FileListViewModel(FileInfo file)
         {
             name = file.Name;
-            path = file.FullName;
+            path = file.DirectoryName;
         }
 
         public string Name => name;
