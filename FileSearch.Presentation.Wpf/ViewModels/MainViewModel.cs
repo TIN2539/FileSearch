@@ -16,7 +16,7 @@ namespace FileSearch.Presentation.Wpf.ViewModels
         private readonly Command pauseCommand;
         private readonly Command resumeCommand;
         private readonly Command searchCommand;
-        private readonly StackBasedIteration stackBasedIteration;
+        private readonly StackBasedIteration stackBasedIteration = new StackBasedIteration();
         private readonly Command stopCommand;
         private readonly ISynchronizationContext synchronizationContext;
         private bool canPause;
@@ -32,7 +32,6 @@ namespace FileSearch.Presentation.Wpf.ViewModels
         {
             drives = DriveInfo.GetDrives();
             selectedDrive = Enumerable.ElementAt(drives, 0);
-            stackBasedIteration = new StackBasedIteration();
             searchCommand = new DelegateCommand(Search, () => CanSearch);
             pauseCommand = new DelegateCommand(Pause, () => CanPause);
             resumeCommand = new DelegateCommand(Resume, () => CanResume);
