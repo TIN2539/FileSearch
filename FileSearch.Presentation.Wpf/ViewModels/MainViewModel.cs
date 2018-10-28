@@ -48,11 +48,8 @@ namespace FileSearch.Presentation.Wpf.ViewModels
         }
 
         public event EventHandler ResumeSearch;
-
         public event EventHandler SearchPaused;
-
         public event EventHandler SearchStarted;
-
         public event EventHandler SearchStoped;
 
         public bool CanPause

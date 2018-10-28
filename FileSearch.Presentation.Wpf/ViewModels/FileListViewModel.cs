@@ -14,6 +14,7 @@ namespace FileSearch.Presentation.Wpf.ViewModels
         }
 
         public string Name => name;
+
         public string Path => path;
     }
 }

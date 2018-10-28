@@ -6,7 +6,6 @@ namespace FileSearch.Domain
     public class StackBasedIteration
     {
         public event EventHandler<FilesEventArgs> FilesFinded;
-
         public event EventHandler SearcFinished;
 
         public void WalkDirectoryTree(DirectoryInfo root, string searchMask)
