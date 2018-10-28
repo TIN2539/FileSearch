@@ -10,7 +10,7 @@ namespace FileSearch.Domain
 
         public void WalkDirectoryTree(DirectoryInfo root, string searchMask)
         {
-            DirectoryInfo[] subDirs = null;
+            DirectoryInfo[] childDirectories = null;
             FileInfo[] files = null;
             try
             {
@@ -24,10 +24,10 @@ namespace FileSearch.Domain
 
             try
             {
-                subDirs = root.GetDirectories();
-                foreach (System.IO.DirectoryInfo dirInfo in subDirs)
+                childDirectories = root.GetDirectories();
+                foreach (System.IO.DirectoryInfo directoryInfo in childDirectories)
                 {
-                    WalkDirectoryTree(dirInfo, searchMask);
+                    WalkDirectoryTree(directoryInfo, searchMask);
                 }
             }
             catch (UnauthorizedAccessException) { }
