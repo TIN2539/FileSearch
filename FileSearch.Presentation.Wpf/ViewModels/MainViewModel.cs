@@ -22,8 +22,8 @@ namespace FileSearch.Presentation.Wpf.ViewModels
         private bool canPause;
         private bool canResume;
         private bool canStop;
-        private IEnumerable<DriveInfo> drives;
-        private ICollection<FileListViewModel> foundFiles = new ObservableCollection<FileListViewModel>();
+        private readonly IEnumerable<DriveInfo> drives;
+        private readonly ICollection<FileListViewModel> foundFiles = new ObservableCollection<FileListViewModel>();
         private string searchMask = string.Empty;
         private DriveInfo selectedDrive;
         private Thread thread;
