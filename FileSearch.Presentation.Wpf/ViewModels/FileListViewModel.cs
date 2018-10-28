@@ -9,12 +9,11 @@ namespace FileSearch.Presentation.Wpf.ViewModels
 
         public FileListViewModel(FileInfo file)
         {
-             name = file.Name;
+            name = file.Name;
             path = file.FullName;
         }
 
-        public string Path => path;
-
         public string Name => name;
+        public string Path => path;
     }
 }

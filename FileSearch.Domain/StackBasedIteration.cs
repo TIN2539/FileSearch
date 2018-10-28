@@ -1,15 +1,11 @@
 ﻿using System;
 using System.IO;
-using System.Threading;
 
 namespace FileSearch.Domain
 {
     public class StackBasedIteration
     {
-        public void WalkDriveTree(DriveInfo drive, string searchMask)
-        {
-            WalkDirectoryTree(drive.RootDirectory, searchMask);
-        }
+        public event EventHandler<FilesEventArgs> FilesFinded;
 
         public void WalkDirectoryTree(DirectoryInfo root, string searchMask)
         {
@@ -36,6 +32,9 @@ namespace FileSearch.Domain
             catch (UnauthorizedAccessException) { }
         }
 
-        public event EventHandler<FilesEventArgs> FilesFinded;
+        public void WalkDriveTree(DriveInfo drive, string searchMask)
+        {
+            WalkDirectoryTree(drive.RootDirectory, searchMask);
+        }
     }
 }

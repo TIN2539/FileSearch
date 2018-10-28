@@ -6,74 +6,73 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Threading;
 
 namespace FileSearch.Presentation.Wpf.ViewModels
 {
     public class MainViewModel : ViewModel
     {
-        private Thread thread;
-        private readonly ISynchronizationContext synchronizationContext;
-        private readonly StackBasedIteration stackBasedIteration;
-        private IEnumerable<DriveInfo> drives;
-        private string searchMask = string.Empty;
-        private DriveInfo selectedDrive;
-        private readonly Command searchCommand;
         private readonly Command pauseCommand;
         private readonly Command resumeCommand;
+        private readonly Command searchCommand;
+        private readonly StackBasedIteration stackBasedIteration;
         private readonly Command stopCommand;
+        private readonly ISynchronizationContext synchronizationContext;
+        private bool canPause;
+        private bool canResume;
+        private bool canStop;
+        private IEnumerable<DriveInfo> drives;
         private ICollection<FileListViewModel> findedFiles = new ObservableCollection<FileListViewModel>();
+        private string searchMask = string.Empty;
+        private DriveInfo selectedDrive;
+        private Thread thread;
 
         public MainViewModel(ISynchronizationContext synchronizationContext)
         {
             drives = DriveInfo.GetDrives();
+            selectedDrive = Enumerable.ElementAt(drives, 0);
             stackBasedIteration = new StackBasedIteration();
             searchCommand = new DelegateCommand(Search, () => CanSearch);
             pauseCommand = new DelegateCommand(Pause, () => CanPause);
-            resumeCommand = new DelegateCommand(Resume);
-            stopCommand = new DelegateCommand(Stop);
+            resumeCommand = new DelegateCommand(Resume, () => CanResume);
+            stopCommand = new DelegateCommand(Stop, () => CanStop);
             stackBasedIteration.FilesFinded += (sender, e) => TryAddFindedFiles(e);
             this.synchronizationContext = synchronizationContext;
+            SearchStarted += (sender, e) => { CanPause = true; CanStop = true; CanResume = false; };
+            SearchPaused += (sender, e) => { CanPause = false; CanResume = true; CanStop = true; };
+            ResumeSearch += (sender, e) => { CanResume = false; CanPause = true; CanStop = true; };
+            SearchStoped += (sender, e) => { CanStop = false; CanResume = false; CanPause = false; };
         }
 
-        private void TryAddFindedFiles(FilesEventArgs e)
+        public event EventHandler ResumeSearch;
+
+        public event EventHandler SearchPaused;
+
+        public event EventHandler SearchStarted;
+
+        public event EventHandler SearchStoped;
+
+        public bool CanPause
         {
-            synchronizationContext.Invoke(() =>
-            {
-                foreach (FileInfo file in e.Files)
-                {
-                    findedFiles.Add(new FileListViewModel(file));
-                }
-            });
+            get => canPause;
+            set => SetProperty(ref canPause, value);
         }
 
-        private void Stop()
+        public bool CanResume
         {
-            try
-            {
-                thread.Abort();
-            }
-            catch (ThreadStateException)
-            {
-                thread.Resume();
-            }
+            get => canResume;
+            set => SetProperty(ref canResume, value);
         }
 
-        private void Resume()
-        {
-            thread.Resume();
-        }
+        [DependsUponProperty(nameof(SearchMask))]
+        [DependsUponProperty(nameof(CanStop))]
+        public bool CanSearch => searchMask != string.Empty && !CanStop;
 
-        private void Pause()
+        public bool CanStop
         {
-            thread.Suspend();
-        }
-
-        private void Search()
-        {
-            findedFiles.Clear();
-            thread = new Thread(() => stackBasedIteration.WalkDriveTree(selectedDrive, searchMask)) { IsBackground = true };
-            thread.Start();
+            get => canStop;
+            set => SetProperty(ref canStop, value);
         }
 
         public IEnumerable<DriveInfo> Drives
@@ -81,6 +80,21 @@ namespace FileSearch.Presentation.Wpf.ViewModels
             get => drives;
             set => SetProperty(ref drives, value);
         }
+
+        public ICollection<FileListViewModel> FindedFiles
+        {
+            get => findedFiles;
+            set => SetProperty(ref findedFiles, value);
+        }
+
+        [RaiseCanExecuteDependsUpon(nameof(CanPause))]
+        public Command PauseCommand => pauseCommand;
+
+        [RaiseCanExecuteDependsUpon(nameof(CanResume))]
+        public Command ResumeCommand => resumeCommand;
+
+        [RaiseCanExecuteDependsUpon(nameof(CanSearch))]
+        public Command SearchCommand => searchCommand;
 
         public string SearchMask
         {
@@ -94,27 +108,52 @@ namespace FileSearch.Presentation.Wpf.ViewModels
             set => SetProperty(ref selectedDrive, value);
         }
 
-        [RaiseCanExecuteDependsUpon(nameof(CanSearch))]
-        public Command SearchCommand => searchCommand;
-
-        [RaiseCanExecuteDependsUpon(nameof(CanPause))]
-        public Command PauseCommand => pauseCommand;
-
-        public Command ResumeCommand => resumeCommand;
-
+        [RaiseCanExecuteDependsUpon(nameof(CanStop))]
         public Command StopCommand => stopCommand;
 
-        [DependsUponProperty(nameof(SearchMask))]
-        [DependsUponProperty(nameof(SelectedDrive))]        
-        public bool CanSearch => searchMask != string.Empty && selectedDrive != null;
-
-        public ICollection<FileListViewModel> FindedFiles
+        private void Pause()
         {
-            get => findedFiles;
-            set => SetProperty(ref findedFiles, value);
+            thread.Suspend();
+            SearchPaused?.Invoke(this, EventArgs.Empty);
         }
 
-        [RaiseCanExecuteDependsUpon(nameof(searchCommand))]
-        public bool CanPause => searchCommand.CanExecute();
+        private void Resume()
+        {
+            thread.Resume();
+            ResumeSearch?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void Search()
+        {
+            findedFiles.Clear();
+            thread = new Thread(() => stackBasedIteration.WalkDriveTree(selectedDrive, searchMask)) { IsBackground = true };
+            thread.Start();
+            SearchStarted?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void Stop()
+        {
+            try
+            {
+                thread.Abort();
+            }
+            catch (ThreadStateException)
+            {
+                thread.Resume();
+            }
+            thread.Abort();
+            SearchStoped?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void TryAddFindedFiles(FilesEventArgs e)
+        {
+            synchronizationContext.Invoke(() =>
+            {
+                foreach (FileInfo file in e.Files)
+                {
+                    findedFiles.Add(new FileListViewModel(file));
+                }
+            });
+        }
     }
 }
